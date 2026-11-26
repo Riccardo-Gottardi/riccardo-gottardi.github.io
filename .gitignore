@@ -1,0 +1,3 @@
+ideas.md
+# local preview build (uv run src/build.py --serve --drafts --out .preview)
+.preview/
