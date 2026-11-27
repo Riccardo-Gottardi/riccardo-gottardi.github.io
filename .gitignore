@@ -1,3 +1,13 @@
 ideas.md
+ISSUES.md
+
+.venv/
+
 # local preview build (uv run src/build.py --serve --drafts --out .preview)
 .preview/
+.claude/
+
+# macOS folder metadata
+.DS_Store
+
+*__pycache__/
