@@ -2,6 +2,7 @@
 title: Home labbing
 order: 2
 color: violet
+series: true
 ---
 
 With this section of the Blog, I want to document my homelabbing journey.

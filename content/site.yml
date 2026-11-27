@@ -1,0 +1,34 @@
+name: Riccardo Gottardi
+tagline: Notes, projects and articles.
+
+repo: https://github.com/Riccardo-Gottardi/riccardo-gottardi.github.io # source repo, used by the footer's license links
+
+url: https://riccardo-gottardi.github.io # public address, written into the MP3 tags
+content_license: # posts and their audio: shown in the footer and written into the MP3 tags (full text: content/LICENSE)
+  name: CC BY-NC-ND 4.0
+  url: https://creativecommons.org/licenses/by-nc-nd/4.0/
+
+theme: graph # stylesheet in static/themes/<theme>.css
+
+audio: # spoken version of each post, recorded by `uv run src/audio.py` (remove the block to turn it off)
+  speed: 1.0
+  voices: # readers pick one on the post (remembered); the first is the default
+    # voice: Kokoro voice name, af_* / am_* American, bf_* / bm_* British (f = female, m = male)
+    - label: Female
+      voice: af_heart
+    - label: Male
+      voice: am_michael,am_fenrir
+
+home:
+  recent_posts: 3 # how many posts "Recent updates" shows
+
+links:
+  - label: Email
+    url: mailto:contact.rg.relive570@passinbox.com
+    text: contact.rg.relive570@passinbox.com
+  - label: LinkedIn
+    url: https://www.linkedin.com/in/riccardo-gottardi-6a1199225/
+    text: riccardo-gottardi
+  - label: GitHub
+    url: https://github.com/Riccardo-Gottardi
+    text: Riccardo-Gottardi

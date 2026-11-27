@@ -26,7 +26,7 @@ In addition to the main distinction above, biases can be further divided in: uni
 
 **Unintentional bias** coincide with input bias, inherited from the training dataset. They where not intended to be part of the system, some of them can be avoided, like the ones related to unbalanced dataset, whereas some other ones cannot, like for the training data of LLMs, that by its nature is subjective, since it is made of human produced text, that embed individuals ideologies and personal biases.
 
-**Intentional bias** represent those biases introduced on purpose, highly likely during alignment, like the ones recognised in DeepSeek, this example will be better explained in the next section [Example](#example). The reader must not fall into the temptation of thinking that those are the only models subject to biases. They are just the more simple case, for western people, to recognise as biases. Western AIs, such as Claude, ChatGPT or else, are biased as well, not just because of unintentional bias that might have "eluded" the alignment process, but exactly for this last one. This point will be further expanded in section [Case Presentation & Analysis](#case-presentation--analysis).
+**Intentional bias** represent those biases introduced on purpose, highly likely during alignment, like the ones recognised in DeepSeek, this example will be better explained in the next section [Example](#example). The reader must not fall into the temptation of thinking that those are the only models subject to biases. They are just the more simple case, for western people, to recognise as biases. Western AIs, such as Claude, ChatGPT or else, are biased as well, not just because of unintentional bias that might have "eluded" the alignment process, but exactly for this last one. This point will be further expanded in section [Case Presentation and Analysis](#case-presentation-and-analysis).
 
 ## Example
 
@@ -40,7 +40,7 @@ Both systems exhibit ideological bias: a systematic, direction-consistent deviat
 
 This paper analyse the current state of ideological biases in AI. Its goal is to give an understanding of what biases consist of, when do they enter the system, what are the current methods used to address them. The approach is of a structured literature review. Building upon academical papers, investigative journalism and industry documentation. While biases can be inherited by any machine learning system, especially on human-generated data. this paper will focus its analysis to LLMs.
 
-# Case Presentation & Analysis
+# Case Presentation and Analysis
 
 ## Current Stato of the Techiniques Used to Address Biases
 

@@ -21,7 +21,10 @@ This blog post solve exactly that problem, reposting them, enjoy :)
 ### Software process
 ```mermaid
 flowchart LR
-    design("Software design<br/>process")
+    accTitle: Software process with AI in the loop
+    accDescr: Software design and increment planning feed each other in both directions. Each increment goes to programming, then to code review and test, which loops back to planning the next increment.
+
+    design("Software design")
     increment("Increment<br/>planning")
     programming("Programming")
     review("Code review<br/>& test")
