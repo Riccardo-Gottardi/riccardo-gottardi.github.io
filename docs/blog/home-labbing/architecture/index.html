@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Architecture · Riccardo Gottardi</title>
+  <meta name="description" content="In this article I&#39;ll cover the architecture of my homelab. To do so, let me first talk about the hardware, so we understand what are the components we are playing with, then talk about the actual architecture and the…">
+  <link rel="icon" type="image/svg+xml" href="/assets/logos/green-logo.svg?v=07db99ed">
+  <link rel="stylesheet" href="/assets/style.css?v=a7ac16a7">
+  <link rel="stylesheet" href="/assets/themes/graph.css?v=197f9836">
+  <link rel="stylesheet" href="/assets/pygments.css?v=1391123c">
+  <script>
+    /* Apply saved display preferences before the first paint (no flash). See /assets/prefs.js */
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith("pref-")) document.documentElement.dataset[key.slice(5)] = localStorage.getItem(key);
+      }
+    } catch (e) {}
+  </script>
+  
+  
+  <script defer src="/assets/vendor/mermaid/mermaid.min.js?v=581ed7d7"></script>
+  <script type="module">  /* modules run after the deferred script above, so `mermaid` exists */
+    mermaid.initialize({ startOnLoad: false, theme: "neutral" });
+    mermaid.run();
+  </script>
+  
+</head>
+<body data-color="violet">
+  <a class="skip-link" href="#content">Skip to content</a>
+  <aside class="sidebar">
+    <a class="logo" href="/" aria-label="Riccardo Gottardi - home">
+      <img src="/assets/logos/violet-logo.svg?v=4e1b4174" alt="" width="220" height="220">
+    </a>
+    <nav class="site-nav">
+      <a href="/"><span class="initial">H</span>ome</a>
+      <a href="/blog/" aria-current="page"><span class="initial">B</span>log</a>
+      <a href="/contact/"><span class="initial">C</span>ontact</a>
+    </nav>
+    <section class="prefs" aria-label="Display preferences">
+      
+      <button type="button" class="pref-toggle" data-pref="spacing" data-value="wide" aria-pressed="false">
+        <span class="switch" aria-hidden="true"></span>Wider spacing
+      </button>
+    </section>
+  </aside>
+  <main id="content">
+    
+<article class="post">
+  <header class="page-header">
+    
+
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="/blog/" data-color="green">Blog</a><span class="sep"> / </span><a href="/blog/home-labbing/" data-color="violet">Home labbing</a>
+</nav>
+
+
+    <h1>Architecture</h1>
+    <p class="meta">
+      <time datetime="2026-11-26">26 Nov 2026</time>
+      <span class="series-part">Part 1 of 1 ·
+        <a href="/blog/home-labbing/">Home labbing</a></span>
+    </p>
+    
+    
+    <figure class="listen">
+      
+      <style>
+        :root:not([data-voice]) .listen audio:not(:first-of-type) { display: none; }
+        :root[data-voice="female"] .listen audio:not([data-voice="female"]) { display: none; }
+        :root[data-voice="male"] .listen audio:not([data-voice="male"]) { display: none; }
+        
+      </style>
+      <div class="voice-switch" role="group" aria-label="Voice">
+        <button type="button" data-pref="voice" data-value="female" data-exclusive data-default aria-pressed="true">Female</button><button type="button" data-pref="voice" data-value="male" data-exclusive aria-pressed="false">Male</button>
+      </div>
+      
+      
+      <audio data-voice="female" controls preload="metadata" src="audio-female.mp3" aria-label="Audio version of this post, female voice"></audio>
+      
+      <audio data-voice="male" controls preload="metadata" src="audio-male.mp3" aria-label="Audio version of this post, male voice"></audio>
+      
+      <figcaption class="meta">Listen · 3 min, synthetic voice (<a href="https://huggingface.co/hexgrad/Kokoro-82M">Kokoro</a>). Code, formulas and the reference list are not read aloud.
+        Download MP3: <a href="audio-female.mp3" download>Female</a>, <a href="audio-male.mp3" download>Male</a></figcaption>
+    </figure>
+    <script src="/assets/listen.js?v=985cc14a" defer></script>
+    
+  </header>
+  <div class="prose"><p>In this article I'll cover the architecture of my homelab.
+To do so, let me first talk about the hardware, so we understand what are the components we are playing with, then talk about the actual architecture and the additional part choices.</p>
+<h2 id="hardware">Hardware</h2>
+<p>I have quite a bit of hardware at home (mostly old one), thanks to my accumulation habit, &quot;One day it might be useful!&quot;. I was right, that day has come.</p>
+<p>I have (relevant to this project):</p>
+<table>
+<thead>
+<tr>
+  <th>What</th>
+  <th>Quantity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>DDR3 SODIMM RAM</td>
+  <td>1x 8GB, 4x 4GB</td>
+</tr>
+<tr>
+  <td>2.5&quot; HDD</td>
+  <td>3x 512GB, 1x 128GB</td>
+</tr>
+<tr>
+  <td>SSD</td>
+  <td>1x 128GB</td>
+</tr>
+<tr>
+  <td>Laptops</td>
+  <td>1x HP EliteBook 745 G3, 2x HP something</td>
+</tr>
+<tr>
+  <td>Boards</td>
+  <td>1x Raspberry Pi 4B</td>
+</tr>
+</tbody>
+</table>
+<p>I therefore built the following nodes (every entry is a node):</p>
+<table>
+<thead>
+<tr>
+  <th>Node</th>
+  <th>Platform</th>
+  <th>CPU</th>
+  <th>RAM</th>
+  <th>ROM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Compute1</td>
+  <td>HP something</td>
+  <td>Intel i3-5005U</td>
+  <td>12GB (8+4) DDR3</td>
+  <td>128GB SSD</td>
+</tr>
+<tr>
+  <td>Compute2</td>
+  <td>HP something</td>
+  <td>Intel i3-5005U</td>
+  <td>8GB (4+4) DDR3</td>
+  <td>128GB SSD</td>
+</tr>
+<tr>
+  <td>NAS</td>
+  <td>Raspberry Pi 4B</td>
+  <td>...</td>
+  <td>4GB</td>
+  <td>4x512GB HDD</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Note</strong> <br/>
+For old components, it is recommendable to test them before using it.
+In my case the components that require testing are: 12GB of RAM of Compute1 and the HDDs of NAS.</p>
+<p>I used <a href="https://www.memtest86.com/">MemTest86</a> to run the tests on the RAMs (there is an opensource alternative as well, <a href="https://www.memtest.org/">Memtest86+</a>. However, I discovered it afterwards). I haven't tested the disks yet, but that's for the future, the main focus for now is to build the compute cluster.</p>
+</blockquote>
+<h2 id="architecture">Architecture</h2>
+<pre class="mermaid">flowchart LR
+    accTitle: Homelab network architecture
+    accDescr: The compute cluster (Compute1 and Compute2) and the NAS each connect to the Bridge router by ethernet. The Bridge router connects to the Home router wirelessly, and the Home router connects to the Internet over DSL.
+
+    subgraph comp_cls[&quot;Compute cluster&quot;]
+        N1[&quot;Compute1&quot;]
+        N2[&quot;Compute2&quot;]
+    end
+
+    NAS[&quot;NAS&quot;]
+    Bridge((&quot;Bridge router&quot;))
+    Home((&quot;Home router&quot;))
+    Internet@{ shape: cloud, label: &quot;Internet&quot; }
+
+    N1 ---|ethernet| Bridge
+    N2 ---|ethernet| Bridge
+    NAS ---|ethernet| Bridge
+    Bridge -.-|wireless| Home
+    Home ---|DSL| Internet
+
+    %% Line colors, numbering follow the order of the defined connection above
+    linkStyle 0,1,2 stroke:#3a9d4a,stroke-width:2px
+    linkStyle 3 stroke:#3b6fd1,stroke-width:2px
+    linkStyle 4 stroke:#e8912d,stroke-width:2px
+
+    classDef cloud fill:#b3d7f7,stroke:#6a9fd4,color:#000
+    class Internet cloud
+</pre>
+<ul>
+<li><p><strong>Home router</strong></p>
+<ul>
+<li>Why it exist: It is the preinstalled modem.</li>
+</ul>
+</li>
+<li><p><strong>Bridge router</strong></p>
+<ul>
+<li>Model: <code>Cuby AX3000 2.5GHz PoE (WR3000P)</code></li>
+<li>Why it exist: For practical reasons, I cannot put my homelab setup in proximity of the Home router. Therefore, I thought about using a router as a bridge, that connects to my Home router via wireless (so no cable between them, that's a reuqirement), and connect to my homelab devices via ethernet.</li>
+</ul>
+</li>
+</ul>
+</div>
+</article>
+
+
+<p class="back"><a href="/blog/home-labbing/">← Home labbing</a></p>
+
+    <footer class="site-footer">
+      © Riccardo Gottardi.
+      Posts and their audio: <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">CC BY-NC-ND 4.0</a>,
+      code snippets in posts: <a href="https://github.com/Riccardo-Gottardi/riccardo-gottardi.github.io/blob/main/LICENSE">MIT</a>.
+      Logo: <a href="https://github.com/Riccardo-Gottardi/riccardo-gottardi.github.io/blob/main/static/logos/LICENSE">all rights reserved</a>.
+    </footer>
+  </main>
+  <script src="/assets/prefs.js?v=a8b85dea" defer></script>
+</body>
+</html>

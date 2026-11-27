@@ -1,0 +1,266 @@
+/* =====================================================================
+   Base styles: layout, readability and shared components.
+   The look (fonts, borders, decoration) comes from static/themes/<theme>.css,
+   which mostly overrides the tokens below.
+   ===================================================================== */
+
+/* Inter (variable, weights 100-900), self-hosted so pages contact no third-party server.
+   From @fontsource-variable/inter 5.3.0; SIL Open Font License, see fonts/inter/LICENSE. */
+@font-face {
+  font-family: "Inter"; font-style: normal; font-weight: 100 900; font-display: swap;
+  src: url("fonts/inter/inter-latin-ext-wght-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Inter"; font-style: normal; font-weight: 100 900; font-display: swap;
+  src: url("fonts/inter/inter-latin-wght-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  --bg: #ffffff;
+  --fg: #141414;
+  --muted: #5f5f66;
+  --line: #dddddd;
+  --line-w: 1px;
+  --line-style: solid;
+  --surface: #f6f6f6;
+  --radius: 0;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-head: var(--font-body);
+  --font-meta: var(--font-body);
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --head-weight: 700;
+  --head-tracking: -0.01em;
+  --sidebar-w: 220px;
+  --measure: 38rem;   /* ~70 characters per line for body text */
+  --wide: 52rem;      /* cards, maps, lists */
+}
+
+/* ---- macro colours (the logo variants). Set by data-color on any element. ---- */
+[data-color="green"] { --c-strong: #00ff00; --c-on-strong: #004500; --c-ink: #006b00; --c-pale: #e6ffe6; }
+[data-color="red"]   { --c-strong: #ff0000; --c-on-strong: #200000; --c-ink: #c40000; --c-pale: #ffe8e8; }
+[data-color="blue"]  { --c-strong: #0400ff; --c-on-strong: #e9e9ff; --c-ink: #0400ff; --c-pale: #e9e9ff; }
+[data-color="violet"] { --c-strong: #8800ff; --c-on-strong: #f3e5ff; --c-ink: #8800ff; --c-pale: #f3e5ff; }
+[data-color="yellow"] { --c-strong: #ffe600; --c-on-strong: #3c3600; --c-ink: #6b5f00; --c-pale: #fff9cc; }
+
+/* ---- base ---- */
+* { box-sizing: border-box; }
+html { font-size: 100%; -webkit-text-size-adjust: 100%; }  /* 16px by default, follows the reader's browser setting */
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  line-height: 1.65;
+  text-rendering: optimizeLegibility;
+}
+a { color: var(--link, var(--c-ink)); text-underline-offset: 0.18em; }  /* themes may set --link */
+h1, h2, h3, h4 {
+  font-family: var(--font-head);
+  font-weight: var(--head-weight);
+  letter-spacing: var(--head-tracking);
+  line-height: 1.2;
+  text-wrap: balance;
+}
+h1 { font-size: clamp(2rem, 1.5rem + 2vw, 2.75rem); margin: 0 0 0.5rem; }
+h2 { font-size: 1.5rem; margin: 2.5rem 0 0.75rem; }
+h3 { font-size: 1.2rem; margin: 2rem 0 0.5rem; }
+h4 { font-size: 1rem; margin: 1.5rem 0 0.5rem; }
+img { max-width: 100%; height: auto; }
+:focus-visible { outline: 2px solid var(--c-ink); outline-offset: 2px; }
+
+/* ---- layout: fixed sidebar + content ---- */
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: var(--sidebar-w);
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border-right: var(--line-w) var(--line-style) var(--line);
+}
+.logo { display: block; line-height: 0; border-bottom: var(--line-w) var(--line-style) var(--line); }
+.logo img { width: 100%; height: auto; display: block; }
+.site-nav { display: flex; flex-direction: column; padding: 1rem 0; margin-block: auto; } /* centred between logo and prefs */
+.site-nav a {
+  display: block;
+  padding: 0.55rem 1.25rem;
+  color: var(--fg);
+  text-decoration: none;
+  font-weight: 500;
+}
+.site-nav a:hover { background: var(--surface); }
+.site-nav a[aria-current="page"] { font-weight: 700; }
+.initial { color: var(--c-ink); font-weight: 700; }
+
+/* One column, centred in the space right of the sidebar. Everything uses it, maps included. */
+main {
+  margin-left: var(--sidebar-w);
+  padding: 3rem clamp(1.25rem, 4vw, 3.5rem) 2rem;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) min(var(--measure), 100%) minmax(0, 1fr);
+  align-content: start;
+}
+main > * { grid-column: 2; min-width: 0; }
+.site-footer {
+  margin-top: 5rem;
+  padding-top: 1rem;
+  border-top: var(--line-w) var(--line-style) var(--line);
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.site-footer a { white-space: nowrap; } /* keep "CC BY-NC-ND 4.0" on one line */
+
+/* ---- skip link: first stop of the keyboard, hidden until focused ---- */
+.skip-link { position: absolute; top: 0.5rem; left: 0.5rem; z-index: 10; padding: 0.4rem 0.9rem; transform: translateY(-200%); }
+.skip-link:focus { transform: none; }
+
+/* ---- text ---- */
+.page-header { margin-bottom: 2.5rem; max-width: var(--wide); }
+.lead { font-size: 1.15rem; color: var(--muted); max-width: var(--measure); }
+.lead p:first-child { margin-top: 0; }
+.prose { max-width: var(--measure); }
+.prose :is(p, ul, ol, blockquote) { margin: 0 0 1.1em; }
+.prose li + li { margin-top: 0.3em; }
+.prose blockquote { margin-left: 0; padding-left: 1rem; border-left: 3px solid var(--line); color: var(--muted); }
+.meta { color: var(--muted); font-family: var(--font-meta); font-size: 0.85rem; }
+.meta a { color: inherit; }
+.list-heading { margin-top: 3rem; }
+.more, .back { margin-top: 1.5rem; }
+
+/* ---- breadcrumbs ---- */
+.breadcrumbs { font-family: var(--font-meta); font-size: 0.85rem; color: var(--muted); margin-bottom: 0.75rem; }
+.breadcrumbs a { color: inherit; }
+.breadcrumbs .sep { color: var(--line); }
+
+/* ---- post lists ---- */
+.post-list { list-style: none; padding: 0; margin: 0; max-width: var(--wide); }
+.post-item { padding: 1.1rem 0; border-bottom: var(--line-w) var(--line-style) var(--line); }
+.post-item:first-child { border-top: var(--line-w) var(--line-style) var(--line); }
+.post-item .meta { display: flex; flex-wrap: wrap; gap: 0.25rem 0.75rem; margin-bottom: 0.2rem; }
+.post-item .trail a { color: var(--c-ink); text-decoration: none; }
+.post-item .trail a:hover { text-decoration: underline; }
+.post-title { font-size: 1.15rem; font-weight: 700; color: var(--fg); text-decoration: none; }
+.post-title:hover { color: var(--c-ink); text-decoration: underline; }
+.summary { margin: 0.3rem 0 0; color: var(--muted); max-width: var(--measure); }
+.series-list { counter-reset: part; }
+.series-list .post-item { counter-increment: part; }
+.series-list .post-item .meta::before { content: "Part " counter(part); font-weight: 600; }
+.draft {
+  color: var(--c-ink); border: 1px solid currentColor; padding: 0 0.4rem;
+  font-size: 0.7rem; font-weight: 600; text-transform: uppercase; vertical-align: middle;
+  font-family: var(--font-meta); letter-spacing: 0.04em;
+}
+
+/* ---- folder cards ---- */
+.cards {
+  display: grid; gap: 1rem; max-width: var(--wide);
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+}
+.card {
+  padding: 1rem 1.2rem;
+  background: var(--surface);
+  border: var(--line-w) var(--line-style) var(--line);
+  border-radius: var(--radius);
+}
+.card-title { margin: 0 0 0.3rem; font-size: 1.1rem; }
+.card-title a { color: var(--fg); text-decoration: none; }
+.card-title a:hover { color: var(--c-ink); text-decoration: underline; }
+.card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+.card .meta { margin-top: 0.4rem; }
+
+/* folder tree and node-link graph: the theme decides which one is shown */
+.blog-map, .net-map { display: none; }
+
+/* ---- posts ---- */
+.post .page-header > .meta { display: flex; flex-wrap: wrap; gap: 0.25rem 0.75rem; }  /* the date line, not the audio caption */
+.listen { margin: 1.25rem 0 0; max-width: var(--measure); }
+.listen audio { display: block; width: 100%; }
+.listen figcaption { margin-top: 0.4rem; }
+.series-nav {
+  display: flex; justify-content: space-between; gap: 1rem;
+  max-width: var(--measure); margin-top: 3rem; padding-top: 1.25rem;
+  border-top: var(--line-w) var(--line-style) var(--line);
+}
+.series-nav a { display: flex; flex-direction: column; text-decoration: none; font-weight: 600; max-width: 48%; }
+.series-nav a[rel="next"] { text-align: right; margin-left: auto; }
+.series-nav .dir { font-family: var(--font-meta); font-size: 0.8rem; font-weight: 400; color: var(--muted); }
+
+/* ---- contact ---- */
+.links { list-style: none; padding: 0; max-width: var(--measure); }
+.links li { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; padding: 0.75rem 0; border-bottom: var(--line-w) var(--line-style) var(--line); }
+.link-label { min-width: 6rem; font-family: var(--font-meta); color: var(--muted); }
+
+/* ---- code, tables, math, diagrams ---- */
+pre, code { font-family: var(--font-mono); font-size: 0.88rem; }
+code { background: var(--surface); padding: 0.1em 0.3em; border-radius: var(--radius); }
+pre { padding: 0.9rem 1rem; overflow-x: auto; border: var(--line-w) var(--line-style) var(--line); border-radius: var(--radius); background: var(--bg); }
+pre code { background: none; padding: 0; }
+.prose pre, .prose table, .prose pre.mermaid { max-width: var(--wide); }
+table { border-collapse: collapse; margin: 1rem 0 1.5rem; display: block; overflow-x: auto; }
+th, td { border: 1px solid var(--line); padding: 0.4rem 0.75rem; text-align: left; }
+th { background: var(--surface); }
+pre.mermaid { border: 0; background: none; text-align: center; }
+.math.block, .katex-display { overflow-x: auto; }
+
+/* ---- citations (build.py link_citations) ---- */
+.cite { white-space: nowrap; }
+.ref { overflow-wrap: anywhere; }                 /* long URLs must not cause horizontal scroll */
+.cite-back { text-decoration: none; white-space: nowrap; }
+.cite, .ref { scroll-margin-top: 2rem; }
+
+/* ---- display preferences (bottom of the sidebar) ---- */
+.prefs {
+  margin-top: 0;
+  border-top: var(--line-w) var(--line-style) var(--line);
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.pref-toggle {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.25rem 0; border: 0; background: none;
+  color: var(--muted); font: inherit; font-size: 0.85rem; cursor: pointer; text-align: left;
+}
+.pref-toggle:hover, .pref-toggle[aria-pressed="true"] { color: var(--fg); }
+.switch { flex: none; position: relative; width: 1.9rem; height: 1.05rem; border-radius: 999px; background: var(--fg); box-shadow: inset 0 0 0 2px var(--fg); transition: background 0.15s; }
+.switch::after {
+  content: ""; position: absolute; top: 0.15rem; left: 0.15rem;
+  width: 0.75rem; height: 0.75rem; border-radius: 50%; background: var(--bg); transition: transform 0.15s;
+}
+/* off: black; on: the page colour (same as the logo), with a black outline */
+.pref-toggle[aria-pressed="true"] .switch { background: var(--c-strong); }
+.pref-toggle[aria-pressed="true"] .switch::after { transform: translateX(0.85rem); background: var(--c-on-strong); }
+
+/* Wider spacing: the WCAG 2.2 SC 1.4.12 text-spacing values. Letter and word spacing
+   grow together, since extra letter spacing alone slows reading (Galliussi et al., 2020).
+   Set on every element so "em" is relative to that element's own font size. */
+:root[data-spacing="wide"] main,
+:root[data-spacing="wide"] main * { letter-spacing: 0.12em; word-spacing: 0.16em; }
+:root[data-spacing="wide"] main { line-height: 1.9; }
+:root[data-spacing="wide"] main .prose :is(p, li) { margin-bottom: 2em; }
+:root[data-spacing="wide"] main .prose li > p { margin-bottom: 0.5em; }
+:root[data-spacing="wide"] main :is(pre, code, .mermaid, .katex, .net),
+:root[data-spacing="wide"] main :is(pre, code, .mermaid, .katex, .net) * { letter-spacing: normal; word-spacing: normal; }
+
+/* ---- narrow screens: the sidebar becomes a top bar ---- */
+@media (max-width: 760px) {
+  .sidebar {
+    position: static; width: auto;
+    flex-direction: row; flex-wrap: wrap; align-items: stretch;
+    border-right: 0; border-bottom: var(--line-w) var(--line-style) var(--line);
+  }
+  .logo { width: 64px; flex: none; border-bottom: 0; }
+  .site-nav { flex: 1 1 0; min-width: 0; flex-direction: row; align-items: center; justify-content: space-around; padding: 0; }
+  .site-nav a { padding: 0.75rem 0.5rem; }
+  .prefs {
+    flex: 1 0 100%; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 0.25rem 1.25rem;
+    margin-top: 0; padding: 0.35rem 1rem;
+  }
+  main { margin-left: 0; padding: 2rem 1rem; }
+}

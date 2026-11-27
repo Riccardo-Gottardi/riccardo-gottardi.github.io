@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Assisted Development · Riccardo Gottardi</title>
+  <meta name="description" content="At a certain point, I started (again) to develop a mind mapping software, and (again) I didn&#39;t finish it. That was the firs project in which I accepted/decided to use AI in the development process. I therefore planned a…">
+  <link rel="icon" type="image/svg+xml" href="/assets/logos/green-logo.svg?v=07db99ed">
+  <link rel="stylesheet" href="/assets/style.css?v=a7ac16a7">
+  <link rel="stylesheet" href="/assets/themes/graph.css?v=197f9836">
+  <link rel="stylesheet" href="/assets/pygments.css?v=1391123c">
+  <script>
+    /* Apply saved display preferences before the first paint (no flash). See /assets/prefs.js */
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith("pref-")) document.documentElement.dataset[key.slice(5)] = localStorage.getItem(key);
+      }
+    } catch (e) {}
+  </script>
+  
+  
+  <script defer src="/assets/vendor/mermaid/mermaid.min.js?v=581ed7d7"></script>
+  <script type="module">  /* modules run after the deferred script above, so `mermaid` exists */
+    mermaid.initialize({ startOnLoad: false, theme: "neutral" });
+    mermaid.run();
+  </script>
+  
+</head>
+<body data-color="red">
+  <a class="skip-link" href="#content">Skip to content</a>
+  <aside class="sidebar">
+    <a class="logo" href="/" aria-label="Riccardo Gottardi - home">
+      <img src="/assets/logos/red-logo.svg?v=3059349b" alt="" width="220" height="220">
+    </a>
+    <nav class="site-nav">
+      <a href="/"><span class="initial">H</span>ome</a>
+      <a href="/blog/" aria-current="page"><span class="initial">B</span>log</a>
+      <a href="/contact/"><span class="initial">C</span>ontact</a>
+    </nav>
+    <section class="prefs" aria-label="Display preferences">
+      
+      <button type="button" class="pref-toggle" data-pref="spacing" data-value="wide" aria-pressed="false">
+        <span class="switch" aria-hidden="true"></span>Wider spacing
+      </button>
+    </section>
+  </aside>
+  <main id="content">
+    
+<article class="post">
+  <header class="page-header">
+    
+
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="/blog/" data-color="green">Blog</a><span class="sep"> / </span><a href="/blog/takes/" data-color="red">Takes</a>
+</nav>
+
+
+    <h1>AI Assisted Development</h1>
+    <p class="meta">
+      <time datetime="2026-11-26">26 Nov 2026</time>
+      
+    </p>
+    
+    
+    <figure class="listen">
+      
+      <style>
+        :root:not([data-voice]) .listen audio:not(:first-of-type) { display: none; }
+        :root[data-voice="female"] .listen audio:not([data-voice="female"]) { display: none; }
+        :root[data-voice="male"] .listen audio:not([data-voice="male"]) { display: none; }
+        
+      </style>
+      <div class="voice-switch" role="group" aria-label="Voice">
+        <button type="button" data-pref="voice" data-value="female" data-exclusive data-default aria-pressed="true">Female</button><button type="button" data-pref="voice" data-value="male" data-exclusive aria-pressed="false">Male</button>
+      </div>
+      
+      
+      <audio data-voice="female" controls preload="metadata" src="audio-female.mp3" aria-label="Audio version of this post, female voice"></audio>
+      
+      <audio data-voice="male" controls preload="metadata" src="audio-male.mp3" aria-label="Audio version of this post, male voice"></audio>
+      
+      <figcaption class="meta">Listen · 5 min, synthetic voice (<a href="https://huggingface.co/hexgrad/Kokoro-82M">Kokoro</a>). Code, formulas and the reference list are not read aloud.
+        Download MP3: <a href="audio-female.mp3" download>Female</a>, <a href="audio-male.mp3" download>Male</a></figcaption>
+    </figure>
+    <script src="/assets/listen.js?v=985cc14a" defer></script>
+    
+  </header>
+  <div class="prose"><p>At a certain point, I started (again) to develop a mind mapping software, and (again) I didn't finish it.
+That was the firs project in which I accepted/decided to use AI in the development process.
+I therefore planned a simple software process, with AI in the loop, and shortly motivated it in the <code>README.md</code>, adding my take on AI assisted development.</p>
+<p>However, as mentioned before, I dropped the project (and made the repo private), the above mentioned info unavailable.
+This blog post solve exactly that problem, reposting them, enjoy :)</p>
+<h2 id="note-on-software-process">Note on software process</h2>
+<h3 id="approach">Approach</h3>
+<h4 id="task-division">Task division</h4>
+<table>
+<thead>
+<tr>
+  <th>Task</th>
+  <th>How it is carried out</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>System design</td>
+  <td>Mainly human</td>
+</tr>
+<tr>
+  <td>Programming</td>
+  <td>Mainly AI</td>
+</tr>
+<tr>
+  <td>Code review</td>
+  <td>Human</td>
+</tr>
+</tbody>
+</table>
+<h4 id="software-process">Software process</h4>
+<pre class="mermaid">flowchart LR
+    accTitle: Software process with AI in the loop
+    accDescr: Software design and increment planning feed each other in both directions. Each increment goes to programming, then to code review and test, which loops back to planning the next increment.
+
+    design(&quot;Software design&quot;)
+    increment(&quot;Increment&lt;br/&gt;planning&quot;)
+    programming(&quot;Programming&quot;)
+    review(&quot;Code review&lt;br/&gt;&amp; test&quot;)
+    
+    design &lt;--&gt; increment
+    increment --&gt; programming
+    programming --&gt; review
+    review --&gt; increment
+</pre>
+<h3 id="reasons">Reasons</h3>
+<p>To understand the reasons behind the approach that has been adopted, are worth mentioning the goals I have in mind for this project:</p>
+<ul>
+<li><strong>Deliver</strong>: Provide to the end user software feature as fast as I can.</li>
+<li><strong>Quality</strong>: Provide to the end user a software that function correctly/as expected.</li>
+<li><strong>Efficiency</strong>: Maximize time to result ratio.</li>
+</ul>
+<p>Using an <a href="#ai-assisted-pair-programming">AI-assisted pair programming</a> approach, I can deliver feature faster than I would do without, allowing me to focus more on code reviews and product testing, to guarantee product behavior correctness. On top of that I'm a solo developer and, as of now, a University student, therefore, the time I have to spend behind the development of this software is limited, with this approach I can higher the amount of work done per unit of time.</p>
+<h2 id="my-take-on-ai-assisted-development">My take on AI assisted development</h2>
+<p>I would like to start by making a distinction between two activity, that I feel are often confused:</p>
+<h3 id="vibe-coding">Vibe coding</h3>
+<p>I suggest you to read the <a href="https://en.wikipedia.org/wiki/Vibe_coding">Wikipedia article</a> about it, it give you a good definition about what it is exactly. Anyway, I want to report part of a Tweet, from Karpathy, <em>&quot;[...] you fully give in to the vibes, [...], and forget that the code even exists. [...] I ask for the dumbest things like &quot;decrease the padding on the sidebar by half&quot; because I'm too lazy to find it. I &quot;Accept All&quot; always, I don't read the diffs anymore. When I get error messages I just copy paste them in with no comment, [...]&quot;</em> <a href="https://x.com/karpathy/status/1886192184808149383">(Andrej Karpathy, February 3rd 2025, X (ex Twitter) post)</a>. I thinkeit resume really well the concept behind Vibe coding, that appear to be a no-brainer process, where it is not even necessary to understand what AI is doing, and therefore the &quot;developer&quot; don't even know what is actually delivering (in the case the vibe coded software is actually delivered).</p>
+<h3 id="ai-assisted-pair-programming">AI-assisted pair programming</h3>
+<p><a href="https://en.wikipedia.org/wiki/Pair_programming">Pair programming</a> is a simple programming paradigm, within which code is written in pairs (pairs of people), one write the code, the other one reviews it at the same time as it is written, the roles are switched following time intervals. With this paradigm there is no one person that wrote the code, both of the parts involved act towards the same goal; both writing and reviewing the code. Now, if one of the sides of the pair is an AI model, then, in my opinion, we are talking about a variation of the original concept of the Pair programming, and we can call it AI-assisted pair programming, that really closely resemble the process that Simon Willison describe as <em>&quot;If an LLM wrote every line of your code but you've reviewed, tested and understood it all, that's not vibe coding in my book - that's using an LLM as a typing assistant.&quot;</em> <a href="https://simonwillison.net/2025/Mar/6/">(Simon Willison, March 6th 2025, Simon Willison's Weblog)</a></p>
+<h2 id="take-home-message">Take home message</h2>
+<p>I don't want to sound pretentious since I'm a newbie in the field and we can say that I don't have a lot of experience, if not None. Take this, for what it is, a point of view.</p>
+<p>I think that as Software engineers (I cover this role in this project, since I do almost everything) part of our job is to make the right choice in accordance with the requirements we have; there is not to much space for gut decisions. So, despite being a person with a bit of a prejudice towards AI-heavy software development, I do think that for this project, AI supported development is a prefect fit, as briefly explained in section <a href="#reasons">Note on software process/Reasons</a>.</p>
+<p>AI assisted development don't have to be demonized. Many are the way of integrating AI in the software process, our job is to make it thoughtfully. If all the world is exited about AI, and, what basically AI does is imitating the human brain capability, maybe the human brain is cool. You have one built in, so use it!, don't take everything that AI says at face value, review, criticise, and test it. Give your brain AI as a tool, not as a substitute.</p>
+</div>
+</article>
+
+
+<p class="back"><a href="/blog/takes/">← Takes</a></p>
+
+    <footer class="site-footer">
+      © Riccardo Gottardi.
+      Posts and their audio: <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">CC BY-NC-ND 4.0</a>,
+      code snippets in posts: <a href="https://github.com/Riccardo-Gottardi/riccardo-gottardi.github.io/blob/main/LICENSE">MIT</a>.
+      Logo: <a href="https://github.com/Riccardo-Gottardi/riccardo-gottardi.github.io/blob/main/static/logos/LICENSE">all rights reserved</a>.
+    </footer>
+  </main>
+  <script src="/assets/prefs.js?v=a8b85dea" defer></script>
+</body>
+</html>
