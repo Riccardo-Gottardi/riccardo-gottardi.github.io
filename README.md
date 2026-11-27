@@ -12,6 +12,8 @@ This file is the guide to **writing content**. See also [DESIGN.md](DESIGN.md) f
 uv run src/build.py                     # build into docs/
 uv run src/build.py --serve             # build, serve on http://127.0.0.1:8000, rebuild on every change
 uv run src/build.py --serve --drafts --out .preview   # preview with drafts, without touching docs/
+uv run src/a11y.py                      # accessibility check of docs/ (--out .preview for the preview)
+uv run src/audio.py                     # record the audio version of new or changed posts (then rebuild)
 ```
 
 Don't commit a `docs/` built with `--drafts`: run a plain build before committing.
@@ -23,6 +25,7 @@ Don't commit a `docs/` built with `--drafts`: run a plain build before committin
 | `content/home.md` | Home page introduction |
 | `content/site.yml` | Site name, tagline, contact links, number of recent posts on the home page |
 | `content/blog/` | The blog: folder tree = structure (see below) |
+| `audio/` | Recordings of the posts (made by `src/audio.py`, committed; don't edit) and their `LICENSE` |
 | `templates/` | Jinja2 templates |
 | `static/` | `style.css` (layout), `themes/graph.css` (look), `prefs.js`, logos: copied to `docs/assets/` |
 
@@ -51,7 +54,9 @@ content/blog/
   At the top it has a map with a **Folders | Graph** switch: the folder tree, or a node-link graph
   (drawn at build time by [src/blog_graph.py](src/blog_graph.py)) whose edges are *contains*, *next part* of a series,
   and *links to* (any link in a post's text to another post).
-- **Level 3 folders are series**: their posts are listed in order and get "Part 2 of 3" and previous/next links.
+- **Series**: a series folder lists its posts in order, and each post gets "Part 2 of 3" and previous/next links.
+  Level 3 folders are series by default; any folder can opt in with `series: true` in its `_index.md`
+  (a level 3 folder can opt out with `series: false`). Only the posts directly in the folder are parts.
 - **Max 3 levels.** A deeper folder is an error, unless it contains an `index.md`, which makes it a post.
 - **Ordering**: a number prefix (`01-`, `02-`) sets the order of posts and folders and is removed from the URL.
   Without one, series are ordered by date and folders alphabetically.
@@ -63,6 +68,49 @@ content/blog/
 A post is either a single `.md` file, or a folder containing `index.md` plus the post's files (images, data…).
 The folder's name is the post's name, and its files are published next to the post, so `![](plot.png)` works.
 The `index.md` is what tells the build that the folder is a post and not a category.
+
+### Accessibility in posts
+
+`uv run src/a11y.py` lists what a post is missing, with the line in the `.md` file. The usual ones:
+
+- **Images:** write what the image shows, `![Accuracy grows with the amount of data](plot.png)`.
+  `![](plot.png)` marks it as decoration, so screen readers skip it.
+- **Mermaid diagrams:** add a name and a description right after the diagram type
+  ([Mermaid docs](https://mermaid.js.org/config/accessibility.html)):
+
+  ```
+  flowchart LR
+      accTitle: Development loop
+      accDescr: Design and planning feed programming, then review, which loops back to planning.
+      ...
+  ```
+- **Headings:** `#` is the top level inside a post (the title is the page's h1); go down one level at a time.
+- **Links:** link text says where it goes (`[the Mermaid docs](…)`, not `[here](…)`); `#anchors` must match a heading.
+
+### Audio version
+
+Every post can have a spoken version, read by [Kokoro](https://huggingface.co/hexgrad/Kokoro-82M), a neural
+text-to-speech model that runs locally. After writing or changing a post:
+
+```bash
+uv run src/audio.py      # records the posts whose text changed (about 4 times faster than real time)
+uv run src/build.py      # copies the recordings next to the posts and adds the player
+```
+
+- A post gets a player only when its recording matches its current text. After an edit, the old recording
+  is no longer used, and the build prints a note until you record again. `--prune` deletes unused recordings.
+- The voices and the speed are set in `content/site.yml` (`audio:`). Each voice is recorded separately, and readers
+  pick one with a switch on the post (remembered, like Wider spacing; the first voice is the default).
+  Adding a voice records only that voice; changing the speed re-records everything.
+- What is read: the title, headings, text, lists, quotes, tables (row by row), image alt text and the
+  Mermaid `accDescr`. Code blocks, math, citations and the References section are replaced by a short
+  "shown on the page" sentence. The rules live in [src/speech.py](src/speech.py).
+- Each MP3 carries its title, author, year, license (`content_license:` in `site.yml`) and the post's address in its
+  ID3 tags, so a downloaded file still says whose it is and under which terms. When those change, `audio.py`
+  rewrites the tags in place without recording again.
+- To hear what will be read, `uv run src/build.py --speech | jq -r '.[0].text'` prints the text of the newest post.
+- Spell unusual words the way they should be pronounced only if the voice gets them wrong; the page text
+  is also the audio's transcript, so keep the two the same.
 
 ### Front matter (all optional)
 
@@ -85,36 +133,48 @@ The front matter needs both `---` lines. Without the first one the build stops w
 title: AI                   # default: folder name, "computer-vision" -> "Computer vision"
 description: One sentence.  # shown under the folder page's title
 order: 1                    # default: number prefix of the folder name
-color: blue                 # green | red | blue (the logo variants), inherited by everything below; default green
+color: blue                 # green | red | blue | violet | yellow (the logo variants), inherited by everything below; default green
+series: true                # posts in this folder are ordered parts with previous/next links; default true only at level 3
 ---
 Optional intro text shown on the folder's page.
 ```
 
-You only need it when the automatic name is wrong (acronyms like "AI"), or to add a description.
+You only need it when the automatic name is wrong (acronyms like "AI"), to add a description, or to make a folder a series.
 
 ### Markdown extras
 
 Tables, footnotes, task lists, `$$ math $$` (KaTeX), fenced code with syntax highlighting,
 ```` ```mermaid ```` diagrams, and `#anchor` links to any heading (`## Reasons` -> `#reasons`).
 
+**Citations.** Under a `# References` (or `# Bibliography`) heading, start each entry's paragraph
+with its key, e.g. `[Hof25] Bjørn Hofmann. “…”`. Writing `[Hof25]` anywhere in the text above it
+becomes a link to that entry, and the entry gets a `↩` link back to each citation. The build warns
+about a citation-looking key with no entry (`[Foo24]`) and about an entry that is never cited, and
+stops on a key that is listed twice. Brackets inside code, math and links are left alone.
+
 ## License
 
-This repository holds work under three different terms:
+This repository holds work under four different terms:
 
 | What | Terms |
 | - | - |
-| The site generator and templates: `src/`, `templates/`, `static/` (except `static/logos/`), and the config files | [MIT License](LICENSE) |
+| The site generator and templates: `src/`, `templates/`, `static/` (except `static/logos/`, `static/fonts/`, `static/vendor/`), and the config files | [MIT License](LICENSE) |
+| Third-party files served by the site (no CDN): the Inter font in `static/fonts/inter/`, KaTeX and Mermaid in `static/vendor/`, their copies under `docs/assets/`, and `docs/assets/pygments.css` (generated from a Pygments style) | Their authors' licenses: [OFL 1.1](static/fonts/inter/LICENSE), [MIT](static/vendor/katex/LICENSE), [MIT](static/vendor/mermaid/LICENSE), BSD 2-Clause for Pygments (full text in `docs/LICENSE`) |
 | The logo and its variants: `static/logos/`, and their copies under `docs/assets/logos/` | © 2026 Riccardo Gottardi, all rights reserved ([details](static/logos/LICENSE)) |
-| The written content: `content/`, and the pages generated from it in `docs/` (except the logo) | © 2026 Riccardo Gottardi, [CC BY-NC-ND 4.0](content/LICENSE) |
+| The written content and its audio versions: `content/`, the recordings in `audio/`, and what the build makes from them in `docs/` (the pages and the `audio-*.mp3` files; except the logo) | © 2026 Riccardo Gottardi, CC BY-NC-ND 4.0 ([posts](content/LICENSE), [audio](audio/LICENSE)) |
 | Code snippets inside the posts | [MIT License](LICENSE) |
 
-The MIT License does **not** cover the logo or the written content.
+The MIT License does **not** cover the logo, the written content or its audio versions.
 
-Quotations and other material by third parties, in the posts, remain under their authors' terms: the licenses
-above cover only what I wrote.
+Quotations and other material by third parties, in the posts and read aloud in their audio versions, remain under
+their authors' terms: the licenses above cover only what I wrote.
+
+The published site carries the same terms: every build writes `docs/LICENSE` (from
+[templates/LICENSE.txt](templates/LICENSE.txt)), which says which files fall under which terms and includes the full
+CC BY-NC-ND and MIT texts; the logo's own terms are copied to `docs/assets/logos/LICENSE`.
 
 - **Logo:** you may not copy, modify, or redistribute it without written permission ([terms](static/logos/LICENSE)).
-- **Posts:** you may share them unchanged, for non-commercial purposes, if you credit the author and link to the
+- **Posts and their audio versions:** you may share them unchanged, for non-commercial purposes, if you credit the author and link to the
   [license](https://creativecommons.org/licenses/by-nc-nd/4.0/). Modified versions, translations included, and
   commercial use need written permission.
 - **Code snippets** in the posts may be reused under the [MIT License](LICENSE).
