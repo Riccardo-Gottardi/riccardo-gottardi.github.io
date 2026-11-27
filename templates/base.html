@@ -1,0 +1,68 @@
+{%- set page_color = color if color is defined else "green" -%}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ site.name }}{% endblock %}</title>
+  <meta name="description" content="{% block description %}{{ site.tagline }}{% endblock %}">
+  <link rel="icon" type="image/svg+xml" href="{{ asset('logos/green-logo.svg') }}">
+  <link rel="stylesheet" href="{{ asset('style.css') }}">
+  <link rel="stylesheet" href="{{ asset('themes/' ~ site.theme ~ '.css') }}">
+  <link rel="stylesheet" href="{{ asset('pygments.css') }}">
+  <script>
+    /* Apply saved display preferences before the first paint (no flash). See /assets/prefs.js */
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith("pref-")) document.documentElement.dataset[key.slice(5)] = localStorage.getItem(key);
+      }
+    } catch (e) {}
+  </script>
+  {% if post is defined and post.has_math %}
+  {# Self-hosted (static/vendor/), like every other file: pages contact no third-party server. #}
+  <link rel="stylesheet" href="{{ asset('vendor/katex/katex.min.css') }}">
+  <script defer src="{{ asset('vendor/katex/katex.min.js') }}"></script>
+  <script defer src="{{ asset('vendor/katex/contrib/auto-render.min.js') }}"
+    onload="renderMathInElement(document.body, {delimiters: [
+      {left: '$$', right: '$$', display: true},
+      {left: '\\(', right: '\\)', display: false}]})"></script>
+  {% endif %}
+  {% if post is defined and post.has_mermaid %}
+  <script defer src="{{ asset('vendor/mermaid/mermaid.min.js') }}"></script>
+  <script type="module">  /* modules run after the deferred script above, so `mermaid` exists */
+    mermaid.initialize({ startOnLoad: false, theme: "neutral" });
+    mermaid.run();
+  </script>
+  {% endif %}
+</head>
+<body data-color="{{ page_color }}">
+  <a class="skip-link" href="#content">Skip to content</a>
+  <aside class="sidebar">
+    <a class="logo" href="/" aria-label="{{ site.name }} - home">
+      <img src="{{ asset('logos/' ~ page_color ~ '-logo.svg') }}" alt="" width="220" height="220">
+    </a>
+    <nav class="site-nav">
+      <a href="/"{% if active == 'home' %} aria-current="page"{% endif %}><span class="initial">H</span>ome</a>
+      <a href="/blog/"{% if active == 'blog' %} aria-current="page"{% endif %}><span class="initial">B</span>log</a>
+      <a href="/contact/"{% if active == 'contact' %} aria-current="page"{% endif %}><span class="initial">C</span>ontact</a>
+    </nav>
+    <section class="prefs" aria-label="Display preferences">
+      {# Each button toggles <html data-{pref}="{value}">, remembered in this browser. #}
+      <button type="button" class="pref-toggle" data-pref="spacing" data-value="wide" aria-pressed="false">
+        <span class="switch" aria-hidden="true"></span>Wider spacing
+      </button>
+    </section>
+  </aside>
+  <main id="content">
+    {% block content %}{% endblock %}
+    <footer class="site-footer">
+      © {{ site.name }}.
+      Posts and their audio: <a rel="license" href="{{ site.content_license.url }}">{{ site.content_license.name }}</a>,
+      code snippets in posts: {% if site.repo %}<a href="{{ site.repo }}/blob/main/LICENSE">MIT</a>{% else %}MIT{% endif %}.
+      Logo: {% if site.repo %}<a href="{{ site.repo }}/blob/main/static/logos/LICENSE">all rights reserved</a>{% else %}all rights reserved{% endif %}.
+    </footer>
+  </main>
+  <script src="{{ asset('prefs.js') }}" defer></script>
+</body>
+</html>

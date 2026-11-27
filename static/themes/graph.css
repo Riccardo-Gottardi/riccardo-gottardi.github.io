@@ -1,0 +1,168 @@
+/* Graph: the blog as a graph. Dot-grid paper, the menu and breadcrumbs as connected nodes,
+   post lists as a timeline, and on folder pages a switch between two maps:
+   Folders (the folder tree) and Graph (a node-link drawing laid out by src/blog_graph.py). */
+
+:root {
+  --fg: #151515;
+  --muted: #555555;
+  --line: #151515;
+  --line-w: 2px;
+  --surface: #ffffff;
+  --font-meta: var(--font-mono);
+  --head-weight: 800;
+  --head-tracking: -0.02em;
+  --edge: 2px solid var(--fg);
+  --node-r: 7px;   /* radius of the round nodes */
+}
+
+body {
+  background-color: var(--bg);
+  background-image: radial-gradient(circle, #dcdcdc 1px, transparent 1.3px);
+  background-size: 22px 22px;
+}
+.sidebar { background: var(--bg); }
+
+/* ---- menu: nodes on a vertical edge ---- */
+.site-nav { position: relative; padding: 1.25rem 0 1.25rem 1.25rem; }
+.site-nav::before {
+  content: ""; position: absolute; left: calc(1.25rem + var(--node-r) - 1px);
+  top: 2.6rem; bottom: 2.6rem; border-left: var(--edge);
+}
+.site-nav a { position: relative; padding-left: 1.75rem; }
+.site-nav a::before {
+  content: ""; position: absolute; left: 0; top: 50%; translate: 0 -50%;
+  width: calc(2 * var(--node-r)); height: calc(2 * var(--node-r));
+  border: var(--edge); border-radius: 50%; background: var(--bg); box-sizing: border-box;
+}
+.site-nav a[aria-current="page"]::before { background: var(--c-strong); }
+.site-nav a:hover { background: none; }
+.site-nav a:hover::before { background: var(--c-pale); }
+
+/* ---- breadcrumbs: a chain of pills ---- */
+.breadcrumbs { display: flex; flex-wrap: wrap; align-items: center; row-gap: 0.4rem; }
+.breadcrumbs a {
+  border: var(--edge); border-radius: 999px; padding: 0.05rem 0.65rem;
+  background: var(--c-pale); color: var(--fg); text-decoration: none; line-height: 1.5;
+}
+.breadcrumbs a:hover { background: var(--c-strong); color: var(--c-on-strong); }
+.breadcrumbs .sep { display: inline-block; width: 1.1rem; border-top: var(--edge); font-size: 0; }
+
+/* ---- folder pages: Folders / Graph switch ---- */
+.cards { display: none; }
+.views { max-width: var(--wide); margin-bottom: 1rem; }
+.view-switch, .voice-switch { display: inline-flex; margin-bottom: 1rem; border: var(--edge); border-radius: 999px; background: var(--bg); overflow: hidden; }
+.voice-switch { margin-bottom: 0.6rem; }
+:is(.view-switch, .voice-switch) button {
+  font: inherit; font-family: var(--font-meta); font-size: 0.8rem; font-weight: 600;
+  padding: 0.3rem 0.9rem; border: 0; background: none; color: var(--fg); cursor: pointer;
+}
+:is(.view-switch, .voice-switch) button + button { border-left: var(--edge); }
+:is(.view-switch, .voice-switch) button:hover { background: var(--c-pale); }
+:is(.view-switch, .voice-switch) button[aria-pressed="true"] { background: var(--c-strong); color: var(--c-on-strong); }
+:is(.view-switch, .voice-switch) button:focus-visible { outline-offset: -4px; }
+
+/* both maps are hidden in the base styles; show the selected one (graph by default) */
+:root:not([data-view="tree"]) .net-map { display: block; }
+:root[data-view="tree"] .blog-map { display: block; }
+
+/* ---- Folders view: the folder tree ---- */
+.blog-map { --y: 1.3rem; }
+.blog-map ul { list-style: none; margin: 0; padding-left: 1.6rem; }
+.blog-map li { position: relative; padding: 0.3rem 0; }
+.blog-map li::before {             /* vertical edge down the siblings */
+  content: ""; position: absolute; left: -1.1rem; top: 0; bottom: 0; border-left: var(--edge);
+}
+.blog-map li:last-child::before { bottom: auto; height: calc(0.3rem + var(--y) - 0.65rem); }
+.blog-map li::after {              /* horizontal edge into the node */
+  content: ""; position: absolute; left: -1.1rem; top: calc(0.3rem + var(--y) - 0.65rem);
+  width: 1rem; border-top: var(--edge);
+}
+.node, .leaf { display: inline-block; line-height: 1.4; text-decoration: none; }
+.node {
+  border: var(--edge); border-radius: 999px; padding: 0.15rem 0.75rem;
+  background: var(--c-pale); color: var(--fg); font-weight: 700;
+}
+.node:hover { background: var(--c-strong); color: var(--c-on-strong); }
+.node.root { background: var(--c-strong); color: var(--c-on-strong); }
+.node .count { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 400; opacity: 0.75; margin-left: 0.2rem; }
+.leaf {
+  padding: 0.15rem 0.6rem; border: 2px dashed var(--fg); background: var(--bg);
+  color: var(--fg); font-size: 0.92rem;
+}
+.leaf:hover { border-style: solid; background: var(--c-pale); }
+
+/* ---- Graph view: node-link drawing ---- */
+.net-map { margin: 0 0 1.5rem; }
+.net-frame { background: var(--bg); border: var(--edge); padding: 1rem; }
+.net { display: block; width: auto; max-width: 100%; height: auto; margin: 0 auto; overflow: visible; font-family: var(--font-body); }  /* natural size, shrink only if needed */
+/* two layouts: normal labels, and wider labels for the "Wider spacing" preference */
+.net-wide { display: none; }
+:root[data-spacing="wide"] .net-wide { display: block; }
+:root[data-spacing="wide"] .net-normal { display: none; }
+:root[data-spacing="wide"] main .net-wide text { letter-spacing: 0.12em; word-spacing: 0.16em; }
+
+.net-edge { stroke: var(--fg); stroke-width: 2; }
+.net-next { stroke-width: 2.5; }
+.net-link { stroke: var(--muted); stroke-dasharray: 5 4; }
+.net-arrowhead { fill: var(--fg); }
+.net-node circle { fill: var(--c-pale); stroke: var(--fg); stroke-width: 2; transition: fill 0.12s; }
+.net-root circle, .net-macro circle { fill: var(--c-strong); }
+.net-post circle { fill: var(--bg); }
+.net-draft circle { stroke-dasharray: 3 2; }
+.net-node text { font-size: 12.5px; font-weight: 700; fill: var(--fg); }
+/* halo: a stroked copy drawn behind the label, so the hover underline stays unbroken */
+.net-node .net-halo { fill: var(--bg); stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; }
+.net-post text { font-weight: 500; }
+.net-node:hover circle, .net-node:focus-visible circle { fill: var(--c-strong); }
+.net-node:hover .net-label { text-decoration: underline; }
+.net-node:focus { outline: none; }
+.net-node:focus-visible circle { stroke-width: 4; }
+.net-legend { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; margin-top: 0.5rem; }
+.net-legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+.lg { overflow: visible; }
+
+/* ---- post lists: a timeline ---- */
+.post-list { position: relative; padding-left: 1.75rem; }
+.post-list::before {
+  content: ""; position: absolute; left: calc(0.5rem - 1px); top: 1.6rem; bottom: 1.6rem; border-left: var(--edge);
+}
+.post-item, .post-item:first-child { position: relative; border: 0; padding: 0.9rem 0; }
+.post-item::before {
+  content: ""; position: absolute; left: calc(-1.25rem - var(--node-r)); top: 1.25rem;
+  width: calc(2 * var(--node-r)); height: calc(2 * var(--node-r)); box-sizing: border-box;
+  border: var(--edge); border-radius: 50%; background: var(--c-strong);
+}
+.post-item .trail a { color: var(--c-ink); }
+.post-title { font-size: 1.25rem; font-weight: 800; }
+.post-title:hover { color: var(--fg); }
+.series-list .post-item::before { border-radius: 2px; }
+
+/* ---- skip link: a pill, like the other controls ---- */
+.skip-link {
+  border: var(--edge); border-radius: 999px; background: var(--bg); color: var(--fg);  /* white: it sits on the coloured logo */
+  font-family: var(--font-meta); font-size: 0.85rem; font-weight: 600; text-decoration: none;
+}
+
+/* ---- text ---- */
+.meta, .breadcrumbs, .link-label, .series-nav .dir { font-size: 0.78rem; }
+.list-heading { font-family: var(--font-mono); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+.prose, .lead, .listen { background: var(--bg); box-shadow: 0 0 0 0.75rem var(--bg); }   /* keep text off the dots */
+.prose blockquote { border-left: var(--edge); }
+th { background: var(--c-pale); }
+.prose :is(.cite, .ref):target { background: var(--c-pale); }   /* where a citation link lands */
+.series-nav a { border: var(--edge); border-radius: 999px; padding: 0.4rem 1rem; color: var(--fg); background: var(--bg); }
+.series-nav a:hover { background: var(--c-pale); }
+.site-footer { border-top: var(--edge); }
+.draft { background: var(--c-strong); color: var(--c-on-strong); border-color: var(--fg); }
+
+/* ---- narrow screens ---- */
+@media (max-width: 760px) {
+  /* the menu becomes a horizontal edge */
+  .site-nav { padding: 0 0.5rem; }
+  .site-nav::before { left: 1.5rem; right: 1.5rem; top: 50%; bottom: auto; border-left: 0; border-top: var(--edge); }
+  .site-nav a { padding: 0.5rem 0.5rem 0.5rem 1.4rem; background: var(--bg); }
+  .site-nav a::before { left: 0.2rem; }
+  /* graph labels would get too small: always show the folder tree */
+  .view-switch, :root:not([data-view="tree"]) .net-map { display: none; }
+  :root .blog-map { display: block; }
+}

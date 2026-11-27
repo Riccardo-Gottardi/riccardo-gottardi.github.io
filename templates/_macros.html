@@ -1,0 +1,38 @@
+{# Shared pieces. `within` is the folder page the list is shown on (none = home). #}
+
+{% macro post_item(p, within=none) %}
+<li class="post-item" data-color="{{ p.color }}">
+  <div class="meta">
+    <time datetime="{{ p.date.isoformat() }}">{{ p.date.strftime('%d %b %Y') }}</time>
+    {%- set trail = p.path_below(within) %}
+    {%- if trail %}
+      <span class="trail">{% for s in trail %}<a href="{{ s.url }}">{{ s.title }}</a>{% if not loop.last %}<span class="sep"> / </span>{% endif %}{% endfor %}</span>
+    {%- endif %}
+  </div>
+  <a class="post-title" href="{{ p.url }}">{{ p.title }}</a>{% if p.draft %} <span class="draft">draft</span>{% endif %}
+  {% if p.summary %}<p class="summary">{{ p.summary }}</p>{% endif %}
+</li>
+{% endmacro %}
+
+{% macro breadcrumbs(items) %}
+{% if items %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  {% for s in items %}<a href="{{ s.url }}" data-color="{{ s.color }}">{{ s.title }}</a>{% if not loop.last %}<span class="sep"> / </span>{% endif %}{% endfor %}
+</nav>
+{% endif %}
+{% endmacro %}
+
+{# The folder tree below `section`, with posts as leaves. Shown by the graph theme. #}
+{% macro blog_map(section) %}
+<ul>
+  {% for c in section.children %}
+  <li class="map-node" data-color="{{ c.color }}">
+    <a class="node" href="{{ c.url }}">{{ c.title }} <span class="count">{{ c.all_posts | length }}</span></a>
+    {{ blog_map(c) }}
+  </li>
+  {% endfor %}
+  {% for p in section.posts %}
+  <li class="map-leaf" data-color="{{ p.color }}"><a class="leaf" href="{{ p.url }}">{{ p.title }}</a></li>
+  {% endfor %}
+</ul>
+{% endmacro %}

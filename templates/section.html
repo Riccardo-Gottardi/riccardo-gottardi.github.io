@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% from "_macros.html" import post_item, breadcrumbs, blog_map %}
+{% block title %}{{ section.title }} · {{ site.name }}{% endblock %}
+{% block description %}{{ section.description or site.tagline }}{% endblock %}
+{% block content %}
+<header class="page-header">
+  {{ breadcrumbs(section.ancestors) }}
+  <h1>{{ section.title }}</h1>
+  {% if section.description %}<p class="lead">{{ section.description }}</p>{% endif %}
+</header>
+{% if section.html %}<div class="prose">{{ section.html | safe }}</div>{% endif %}
+
+{% if section.graph_svg %}
+<section class="views" aria-label="Map of {{ section.title }}">
+  {# Remembered like the sidebar preferences: <html data-view="tree|graph">, graph by default. #}
+  <div class="view-switch" role="group" aria-label="View">
+    <button type="button" data-pref="view" data-value="tree" data-exclusive aria-pressed="false">Folders</button>
+    <button type="button" data-pref="view" data-value="graph" data-exclusive data-default aria-pressed="true">Graph</button>
+  </div>
+
+  <nav class="blog-map" aria-label="Folders of {{ section.title }}">
+    <a class="node root" href="{{ section.url }}" data-color="{{ section.color }}">{{ section.title }}</a>
+    {{ blog_map(section) }}
+  </nav>
+
+  <figure class="net-map">
+    <div class="net-frame">
+      {{ section.graph_svg | safe }}
+      {{ section.graph_svg_wide | safe }}
+    </div>
+    <figcaption class="meta net-legend">
+      <span><svg class="lg" viewBox="0 0 28 10" width="28" height="10" aria-hidden="true"><line class="net-edge net-contains" x1="1" y1="5" x2="27" y2="5"/></svg>contains</span>
+      <span><svg class="lg" viewBox="0 0 28 10" width="28" height="10" aria-hidden="true"><line class="net-edge net-next" x1="1" y1="5" x2="21" y2="5"/><path class="net-arrowhead" d="M20,1 L28,5 L20,9 z"/></svg>next part</span>
+      <span><svg class="lg" viewBox="0 0 28 10" width="28" height="10" aria-hidden="true"><line class="net-edge net-link" x1="1" y1="5" x2="21" y2="5"/><path class="net-arrowhead" d="M20,1 L28,5 L20,9 z"/></svg>links to</span>
+    </figcaption>
+  </figure>
+</section>
+{% endif %}
+
+{% if section.is_series %}
+<ol class="post-list series-list">
+  {% for p in section.posts %}{{ post_item(p, within=section) }}{% endfor %}
+</ol>
+{% set others = section.all_posts | reject('in', section.posts) | list %}
+{% if others %}
+  <h2 class="list-heading">More posts</h2>
+  <ul class="post-list">
+    {% for p in others %}{{ post_item(p, within=section) }}{% endfor %}
+  </ul>
+{% endif %}
+{% else %}
+  <h2 class="list-heading">{{ 'All posts' if section.children else 'Posts' }}</h2>
+  <ul class="post-list">
+    {% for p in section.all_posts %}{{ post_item(p, within=section) }}{% else %}<li>No articles yet.</li>{% endfor %}
+  </ul>
+{% endif %}
+{% endblock %}

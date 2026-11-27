@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% from "_macros.html" import breadcrumbs %}
+{% block title %}{{ post.title }} · {{ site.name }}{% endblock %}
+{% block description %}{{ post.summary }}{% endblock %}
+{% block content %}
+<article class="post">
+  <header class="page-header">
+    {{ breadcrumbs(post.breadcrumbs) }}
+    <h1>{{ post.title }}{% if post.draft %} <span class="draft">draft</span>{% endif %}</h1>
+    <p class="meta">
+      <time datetime="{{ post.date.isoformat() }}">{{ post.date.strftime('%d %b %Y') }}</time>
+      {% if post.section.is_series %}<span class="series-part">Part {{ post.part }} of {{ post.section.posts | length }} ·
+        <a href="{{ post.section.url }}">{{ post.section.title }}</a></span>{% endif %}
+    </p>
+    {% if post.audio %}
+    {# Recorded by src/audio.py; the page itself is the transcript. One player per voice, the chosen one shown
+       (saved like the sidebar preferences: <html data-voice="…">, the first voice by default). #}
+    <figure class="listen">
+      {% if post.audio | length > 1 %}
+      <style>
+        :root:not([data-voice]) .listen audio:not(:first-of-type) { display: none; }
+        {% for a in post.audio %}:root[data-voice="{{ a.id }}"] .listen audio:not([data-voice="{{ a.id }}"]) { display: none; }
+        {% endfor %}
+      </style>
+      <div class="voice-switch" role="group" aria-label="Voice">
+        {% for a in post.audio %}<button type="button" data-pref="voice" data-value="{{ a.id }}" data-exclusive{% if loop.first %} data-default{% endif %} aria-pressed="{{ 'true' if loop.first else 'false' }}">{{ a.label }}</button>{% endfor %}
+      </div>
+      {% endif %}
+      {% for a in post.audio %}
+      <audio data-voice="{{ a.id }}" controls preload="metadata" src="{{ a.file }}" aria-label="Audio version of this post, {{ a.label | lower }} voice"></audio>
+      {% endfor %}
+      <figcaption class="meta">Listen · {{ post.audio[0].minutes }} min, synthetic voice (<a href="https://huggingface.co/hexgrad/Kokoro-82M">Kokoro</a>). Code, formulas and the reference list are not read aloud.
+        Download MP3: {% for a in post.audio %}<a href="{{ a.file }}" download>{{ a.label }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</figcaption>
+    </figure>
+    <script src="{{ asset('listen.js') }}" defer></script>
+    {% endif %}
+  </header>
+  <div class="prose">{{ post.html | safe }}</div>
+</article>
+
+{% if post.prev or post.next %}
+<nav class="series-nav" aria-label="Series">
+  {% if post.prev %}<a rel="prev" href="{{ post.prev.url }}"><span class="dir">← Previous</span>{{ post.prev.title }}</a>{% else %}<span></span>{% endif %}
+  {% if post.next %}<a rel="next" href="{{ post.next.url }}"><span class="dir">Next →</span>{{ post.next.title }}</a>{% endif %}
+</nav>
+{% endif %}
+<p class="back"><a href="{{ post.section.url }}">← {{ post.section.title }}</a></p>
+{% endblock %}
